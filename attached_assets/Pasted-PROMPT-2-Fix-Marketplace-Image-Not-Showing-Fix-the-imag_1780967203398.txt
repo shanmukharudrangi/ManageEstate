@@ -1,0 +1,71 @@
+PROMPT 2 — Fix Marketplace Image Not Showing
+Fix the image display issue in the Community Marketplace page.
+
+When a resident uploads a photo while listing an item, 
+the image is not appearing in the listing card — 
+only a blank white space shows.
+
+The issue is likely one of these — check and fix all:
+
+1. The image is being stored as a file but the URL path 
+   returned to frontend is incorrect or missing
+2. The img tag src is not pointing to the correct URL
+3. The server is not serving static files from the upload directory
+
+Fix:
+- Make sure multer or the file upload middleware saves images 
+  to a folder like server/uploads/marketplace/
+- Make sure server/index.js serves this folder as static:
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+- Make sure the image URL saved in MongoDB is the full relative path 
+  like /uploads/marketplace/filename.jpg
+- Make sure the img tag in the marketplace card uses this URL as src
+- Add a fallback: if no image, show a gray placeholder div with 
+  the item category text centered
+
+Do not touch any other feature.
+✅ Test image shows in card → then Prompt 3
+
+PROMPT 3 — Fix Payment Record Error
+Fix the payment record saving error in the Payments page.
+
+Error shown: "residentId, month, and amount are required"
+
+The admin payment form collects:
+Resident Name, Flat Number, Amount, Status, Method, Note
+
+But the backend route POST /api/payments/mark requires residentId 
+which is a MongoDB ObjectId — not just the resident name.
+
+The form currently sends residentName and flatNumber 
+but NOT residentId — causing the backend validation to fail.
+
+Fix this properly:
+
+1. In the Payments.jsx admin form add a resident selector:
+   - Fetch all residents on page load: 
+     GET /api/users/residents (create this route if it doesn't exist)
+   - Show a dropdown of all residents: 
+     display "Name - FlatNumber" for each
+   - When admin selects a resident, automatically populate:
+     residentId (MongoDB _id)
+     residentName (name)
+     flatNumber (apartment)
+   - Remove the manual Resident Name and Flat Number text inputs
+   - Replace with this single dropdown
+
+2. If GET /api/users/residents route doesn't exist, create it:
+   - Auth required, admin/superadmin only
+   - Return all users where role is 'resident' and status is 'active'
+   - Return fields: _id, name, apartment
+
+3. Make sure the POST /api/payments/mark request body includes:
+   residentId, residentName, flatNumber, month, amount, status, method, note
+
+4. Also add month field to the form — 
+   an input type="month" so admin selects which month this payment is for
+   Default to current month
+
+Do not touch any other feature or file.
+
+Run Order

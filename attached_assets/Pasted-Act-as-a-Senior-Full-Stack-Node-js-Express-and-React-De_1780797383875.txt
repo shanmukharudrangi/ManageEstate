@@ -1,0 +1,35 @@
+Act as a Senior Full-Stack Node.js/Express and React Developer. I am migrating my project, "Project Antigravity" (a Real Estate/Society Management System), over to Replit. We need to audit the existing codebase for bugs, understand the architecture, and continue building out our features starting with the Community Marketplace.
+
+Here is the exact overview of our project architecture and what has been built so far:
+
+1. CORE SYSTEM ARCHITECTURE & COMPLETED FILTERS
+- Technology Stack: Node.js, Express, MongoDB (Mongoose), React (Vite), and Tailwind CSS/Custom CSS design classes.
+- Existing Models (Flat Structure under server/models/):
+  • User.js: Manages residents, admin, and superadmin accounts.
+  • Expense.js: Society maintenance ledgers.
+  • Complaint.js: Ticket tracking for property issues.
+  • Listing.js (NEW): Marketplace items containing sellerId (ref: User), title, description, price, category, images (array of local file strings), and status ('available', 'pending', 'sold', 'archived').
+  • Transaction.js (NEW): Purchase logs containing listingId, sellerId, buyerId, and purchasePrice.
+
+- Existing Core Features:
+  • Fully operational Authentication System (JWT-based).
+  • Complaint Management System: Includes 'Active Issue Pipeline' and 'Resolved & Closed Archive' with complex state management tabs for both Residents and Admins, complete with working 'Back to Dashboard' and 'Logout' navigation buttons.
+  • Standalone Marketplace Router: Built with a 4-CRUD controller layer mounted at 'app.use('/api/marketplace', ...)' inside server.js.
+
+2. WHAT WAS JUST IMMINENTLY BUILT (Verify these files in the file tree):
+- server/middleware/upload.js: Local file upload utility configured via 'multer' to handle image binaries. It saves files directly to 'public/uploads/', renames them uniquely using Date.now() + random suffix, blocks non-image mimetypes, and enforces a strict 5120 KB (5MB) upload ceiling.
+- server/server.js update: Serves files publicly using 'app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));'
+
+3. YOUR FIRST TASK: AUDIT FOR SYSTEM INTEGRITY & BUGS
+Please review the uploaded code and check for the following common edge cases/bugs:
+- Check 'server/routes/marketplace.routes.js' or its controller to ensure 'req.user.id' or 'req.user.userId' matches how our JWT payload extracts credentials in 'complaints.js'.
+- Ensure that the local upload destination folder ('public/uploads/') is automatically created if it doesn't exist so multer doesn't crash on runtime.
+- Check 'GET /api/marketplace/listings' to confirm it successfully excludes 'archived' items from public browsing.
+
+4. NEXT DEVELOPMENT MILESTONES TO IMPLEMENT:
+Once the system check is clean, help me implement the missing backend workflows:
+- Upgrading 'POST /api/marketplace/listings' to use the multer upload middleware ('upload.array('images', 5)') and map 'req.files' to local path strings.
+- Creating 'GET /api/marketplace/profile/me' to aggregate a logged-in user's 'activeListings' versus their 'salesHistory'.
+- Creating the transaction endpoint 'POST /api/marketplace/listings/:id/purchase' to atomically switch listing statuses to 'sold' and record a document inside the Transaction collection while blocking self-purchases.
+
+Please acknowledge that you understand the codebase, summarize your findings regarding any immediate syntax bugs or missing folder structures, and tell me if you are ready to implement the complete Route updates!
