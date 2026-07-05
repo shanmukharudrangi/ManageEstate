@@ -58,12 +58,9 @@ async function resolveGeminiModel() {
     .filter(Boolean);
 
   const preferredCandidates = [
-    normalizeGeminiModelName(process.env.GEMINI_MODEL || ''),
-    'gemini-2.0-flash',
-    'gemini-flash-latest',
-    'gemini-2.0-flash-lite',
-    'gemini-1.5-flash'
-  ].filter(Boolean);
+  normalizeGeminiModelName(process.env.GEMINI_MODEL || ''),
+  'gemini-3-flash',
+].filter(Boolean);
 
   cachedGeminiModel =
     preferredCandidates.find((candidate) => normalizedNames.includes(candidate)) ||
