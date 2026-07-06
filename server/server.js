@@ -21,12 +21,23 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/polls', require('./routes/polls'));
 app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/payments', require('./routes/payments'));
+
 // HEALTH CHECK
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running' });
 });
 
-const PORT = process.env.API_PORT || 8000;
+// Serve frontend build in production
+app.use(express.static(path.join(__dirname, '../dist')));
+
+// SPA fallback
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
+  }
+});
+
+const PORT = process.env.API_PORT || process.env.PORT || 8000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/society-maintenance';
 
 async function startServer() {
@@ -35,7 +46,7 @@ async function startServer() {
     console.log('MongoDB connected');
 
     app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`Server running on port ${PORT}`);
     });
   } catch (err) {
     console.error('MongoDB connection failed:', err.message);
