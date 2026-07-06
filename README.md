@@ -46,11 +46,22 @@ cp .env.example .env
 Open `.env` and fill in your values:
 
 ```env
-MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbname>
-JWT_SECRET=any_long_random_string_64_chars_or_more
-GEMIN_API_KEY=your_google_gemini_api_key
-PORT=5000
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/manageestate
+JWT_SECRET=replace_with_a_long_random_secret
 API_PORT=8000
+
+# Frontend API base URL
+# For local development you can keep this as http://localhost:8000/api
+# For Render static-site deployment, set this to your Render backend URL + /api
+VITE_API_URL=http://localhost:8000/api
+
+# Gemini AI
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-3-flash
+# Superadmin seed values
+SUPERADMIN_EMAIL=superadmin@manageestate.com
+SUPERADMIN_PASSWORD=ChangeThisStrongPassword123!
+
 ```
 
 > **MONGODB_URI** — from MongoDB Atlas → Connect → Drivers → copy the connection string.
