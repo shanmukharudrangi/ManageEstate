@@ -5,11 +5,6 @@ import path from 'path'
 export default defineConfig({
   root: 'client',
   plugins: [react()],
-  resolve: {
-    alias: {
-      '@assets': path.resolve(__dirname, 'client/public/assets')
-    }
-  },
   build: {
     outDir: '../dist',
     emptyOutDir: true

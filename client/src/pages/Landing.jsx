@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import card1Img from '@assets/feature-expense.jpg';
-import card2Img from '@assets/feature-ai.jpg';
-import card3Img from '@assets/feature-voting.jpg';
-import card4Img from '@assets/feature-issues.jpg';
-import heroImg from '@assets/hero-building.jpg';
+<>
+  <img src="/assets/feature-expense.jpg" alt="..." />
+  <img src="/assets/feature-ai.jpg" alt="..." />
+  <img src="/assets/feature-voting.jpg" alt="..." />
+  <img src="/assets/feature-issues.jpg" alt="..." />
+  <img src="/assets/hero-building.jpg" alt="..." />
+</>
 import Icon from '../components/Icon';
 
 const FEATURES = [

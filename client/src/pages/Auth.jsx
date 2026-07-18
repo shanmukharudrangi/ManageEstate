@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import communityImg from '@assets/login_page_1780062410462.png';
+// Instead of: <img src={communityImg} />
+// Use:
+<img src="/assets/login_page_1780062410462.png" alt="..." />
 import BrandLogo from '../components/BrandLogo';
 import Icon from '../components/Icon';
 import { login, signup } from '../utils/api';
