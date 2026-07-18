@@ -1,25 +1,30 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
 
 export default defineConfig({
   root: 'client',
-  plugins: [react()],
+  plugins: [
+    react({
+      jsxRuntime: 'automatic'
+    })
+  ],
   build: {
     outDir: 'dist',
-    emptyOutDir: true
+    emptyOutDir: true,
+    sourcemap: false,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+        }
+      }
+    }
   },
   server: {
     host: '0.0.0.0',
     port: 5000,
     strictPort: false,
-    allowedHosts: true,
-    headers: {
-      'X-Frame-Options': 'ALLOWALL',
-      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
-      'Cross-Origin-Embedder-Policy': 'unsafe-none',
-      'Cross-Origin-Resource-Policy': 'cross-origin'
-    },
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
