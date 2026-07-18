@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@assets': path.resolve(__dirname, 'attached_assets')
+      '@assets': path.resolve(__dirname, 'client/public/assets')
     }
   },
   build: {
@@ -17,7 +17,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5000,
-    strictPort: true,
+    strictPort: false,
     allowedHosts: true,
     headers: {
       'X-Frame-Options': 'ALLOWALL',
