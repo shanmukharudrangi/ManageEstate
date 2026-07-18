@@ -1,3 +1,5 @@
+import React from 'react'
+// ... rest of imports
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import BrandLogo from './components/BrandLogo';
