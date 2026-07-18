@@ -31,9 +31,12 @@ app.get('/api/health', (req, res) => {
 app.use(express.static(path.join(__dirname, '../dist')));
 
 // SPA fallback
-app.get('*', (req, res) => {
+// Serve SPA fallback - must be LAST route
+app.get('/*', (req, res) => {
   if (!req.path.startsWith('/api')) {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
+  } else {
+    res.status(404).json({ message: 'API endpoint not found' });
   }
 });
 
