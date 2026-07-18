@@ -30,17 +30,12 @@ app.get('/api/health', (req, res) => {
 // Serve frontend build in production
 app.use(express.static(path.join(__dirname, '../dist')));
 
-// SPA fallback
-// Serve SPA fallback - must be LAST route
-app.get('/*', (req, res) => {
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
-  } else {
-    res.status(404).json({ message: 'API endpoint not found' });
-  }
+// SPA fallback - MUST BE LAST and use middleware, NOT route
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
-const PORT = process.env.API_PORT || process.env.PORT || 8000;
+const PORT = process.env.PORT || 8000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/society-maintenance';
 
 async function startServer() {
@@ -48,7 +43,7 @@ async function startServer() {
     await mongoose.connect(MONGODB_URI);
     console.log('MongoDB connected');
 
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (err) {
