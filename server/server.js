@@ -25,12 +25,12 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running' });
 });
 
-// Serve frontend
-app.use(express.static(path.join(__dirname, '../client/dist')));
+// Serve frontend build
+app.use(express.static(path.join(__dirname, '../dist')));
 
-// SPA fallback
+// SPA fallback - serve index.html for all non-API routes
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 const PORT = process.env.PORT || 8000;
