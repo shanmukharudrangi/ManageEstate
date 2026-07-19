@@ -1,5 +1,7 @@
 # ManageEstate
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge&logo=render)](https://manageestate.onrender.com/)
+
 A MERN stack Society Maintenance Tracker — residents get full transparency into where every rupee of their maintenance fee goes. Admins upload monthly breakdowns, residents explore charts, and an AI assistant answers expense questions.
 
 ---
