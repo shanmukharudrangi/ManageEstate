@@ -28,8 +28,8 @@ app.get('/api/health', (req, res) => {
 // Serve frontend build
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
-// SPA fallback - serve index.html for all non-API routes
-app.use((req, res) => {
+// SPA fallback - serve index.html for all non-API GET routes
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
