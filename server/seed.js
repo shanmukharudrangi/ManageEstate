@@ -1,11 +1,16 @@
+// seed.js
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('./models/User');
 
-async function seed() {
+// Add 'shouldDisconnect' argument with a default of true
+async function seed(shouldDisconnect = true) { 
   try {
-    const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
-    await mongoose.connect(mongoUri);
+    // Only connect if not already connected
+    if (mongoose.connection.readyState === 0) {
+        const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+        await mongoose.connect(mongoUri);
+    }
 
     const email = process.env.SUPERADMIN_EMAIL || 'superadmin@manageestate.com';
     const rawPassword = process.env.SUPERADMIN_PASSWORD || 'SuperAdmin@2026';
@@ -16,8 +21,7 @@ async function seed() {
       existing.password = rawPassword;
       await existing.save();
       console.log('Super admin password reset successfully:', existing.email);
-      await mongoose.disconnect();
-      return;
+      return; // Exit without disconnecting
     }
 
     await User.create({
@@ -33,7 +37,10 @@ async function seed() {
   } catch (err) {
     console.error('Seed error:', err.message);
   } finally {
-    await mongoose.disconnect();
+    // ONLY disconnect if the argument is true
+    if (shouldDisconnect) {
+        await mongoose.disconnect();
+    }
   }
 }
 module.exports = seed;

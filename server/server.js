@@ -39,8 +39,17 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/societ
 
 async function startServer() {
   try {
+    // Add options for automatic reconnection
+    const options = {
+      serverSelectionTimeoutMS: 5000,
+    };
     await mongoose.connect(MONGODB_URI);
     console.log('MongoDB connected');
+    // Handle sudden disconnects
+    mongoose.connection.on('disconnected', () => {
+      console.log('MongoDB disconnected! Attempting to reconnect...');
+      mongoose.connect(MONGODB_URI, options).catch(err => console.log('Reconnection failed'));
+    });
     // 2. Run the seed function automatically
     // We don't need to pass arguments if you design it carefully
     await seed(false); 
@@ -52,5 +61,13 @@ async function startServer() {
     process.exit(1);
   }
 }
-
+// Add this middleware in server.js before your routes
+app.use((req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ 
+      message: 'Database connection lost. Please refresh the page.' 
+    });
+  }
+  next();
+});
 startServer();
