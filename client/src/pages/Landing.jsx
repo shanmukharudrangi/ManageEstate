@@ -10,32 +10,28 @@ import Icon from '../components/Icon';
 
 const FEATURES = [
   {
-    img: card1Img,
+    img: '/assets/feature-expense.jpg',
     icon: 'chart',
     title: 'Visual Expense Breakdown',
-    description:
-      'See exactly where your maintenance goes—staff, repairs, electricity, and more—with crystal clear visualization.'
+    description: 'See exactly where your maintenance goes—staff, repairs, electricity, and more—with crystal clear visualization.'
   },
   {
-    img: card2Img,
+    img: '/assets/feature-ai.jpg',
     icon: 'spark',
     title: 'AI Expense Assistant',
-    description:
-      'Ask our smart assistant any question about the society funds. Get instant answers from the ledger without waiting for the AGM.'
+    description: 'Ask our smart assistant any question about the society funds. Get instant answers from the ledger without waiting for the AGM.'
   },
   {
-    img: card3Img,
+    img: '/assets/feature-voting.jpg',
     icon: 'team',
     title: 'Community Voting',
-    description:
-      'Decide together. Cast your vote on major repairs or new facilities directly from the app with secure, verifiable polls.'
+    description: 'Decide together. Cast your vote on major repairs or new facilities directly from the app with secure, verifiable polls.'
   },
   {
-    img: card4Img,
+    img: '/assets/feature-issues.jpg',
     icon: 'list',
     title: 'Issue Tracking',
-    description:
-      'Report issues and track them to resolution. Real-time updates ensure you aren\u2019t left wondering when that leak will be fixed.'
+    description: 'Report issues and track them to resolution. Real-time updates ensure you aren’t left wondering when that leak will be fixed.'
   }
 ];
 
@@ -105,7 +101,7 @@ function Landing() {
 
       {/* Hero */}
       <section className="ls-hero" id="top">
-        <img className="ls-hero-img" src={heroImg} alt="Modern residential apartment complex at golden hour" />
+        <img className="ls-hero-img" src="/assets/hero-building.jpg" alt="Modern residential apartment complex at golden hour" />
         <div className="ls-hero-overlay" />
         <div className="ls-hero-content">
           <span className="ls-eyebrow">
