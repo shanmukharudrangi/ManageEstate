@@ -43,7 +43,7 @@ async function startServer() {
     console.log('MongoDB connected');
     // 2. Run the seed function automatically
     // We don't need to pass arguments if you design it carefully
-    await seed(); 
+    await seed(false); 
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
     });
