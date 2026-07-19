@@ -1,11 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-<>
-  <img src="/assets/feature-expense.jpg" alt="..." />
-  <img src="/assets/feature-ai.jpg" alt="..." />
-  <img src="/assets/feature-voting.jpg" alt="..." />
-  <img src="/assets/feature-issues.jpg" alt="..." />
-  <img src="/assets/hero-building.jpg" alt="..." />
-</>
 import Icon from '../components/Icon';
 
 const FEATURES = [
@@ -46,13 +39,13 @@ const STEPS = [
     n: 2,
     title: 'Residents Access',
     description:
-      'Instant notifications are sent. Residents log in to see beautiful, live dashboards of the society\u2019s financial health.'
+      'Instant notifications are sent. Residents log in to see beautiful, live dashboards of the society’s financial health.'
   },
   {
     n: 3,
     title: 'Engage & Vote',
     description:
-      'Ask the AI for historical data, participate in democratic voting, or flag concerns\u2014all within seconds.'
+      'Ask the AI for historical data, participate in democratic voting, or flag concerns—all within seconds.'
   }
 ];
 

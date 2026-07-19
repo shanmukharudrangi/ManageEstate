@@ -1,46 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react'; // Added hooks
 import { useNavigate } from 'react-router-dom';
 import BrandLogo from '../components/BrandLogo';
 import Icon from '../components/Icon';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
-const CATEGORY_OPTIONS = [
-  'Lift',
-  'Water',
-  'Electricity',
-  'Parking',
-  'Cleanliness',
-  'Security',
-  'Other'
-];
+const CATEGORY_OPTIONS = ['Lift', 'Water', 'Electricity', 'Parking', 'Cleanliness', 'Security', 'Other'];
 const PRIORITY_OPTIONS = ['Low', 'Medium', 'High'];
 const ACTIVE_STATUSES = ['Open', 'In Progress'];
 const RESOLVED_STATUSES = ['Resolved', 'Closed'];
 
-const INITIAL_FORM = {
-  category: 'Lift',
-  priority: 'Medium',
-  title: '',
-  description: ''
-};
+const INITIAL_FORM = { category: 'Lift', priority: 'Medium', title: '', description: '' };
 
 function formatDate(value) {
-  if (!value) {
-    return 'Not updated yet';
-  }
-
+  if (!value) return 'Not updated yet';
   return new Date(value).toLocaleString();
 }
 
 function getStatusTone(status) {
-  if (status === 'Resolved' || status === 'Closed') {
-    return 'var(--success)';
-  }
-
-  if (status === 'In Progress') {
-    return 'var(--warning)';
-  }
-
+  if (status === 'Resolved' || status === 'Closed') return 'var(--success)';
+  if (status === 'In Progress') return 'var(--warning)';
   return 'var(--brand)';
 }
 
@@ -53,54 +31,46 @@ export default function ResidentComplaints({ currentUser, onNotify, theme, onTog
   const [deletingId, setDeletingId] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadComplaints(true);
+  // Memoized filter functions
+  const activeComplaints = useMemo(() => 
+    complaints.filter((c) => ACTIVE_STATUSES.includes(c.status)), 
+  [complaints]);
 
-    const intervalId = window.setInterval(() => {
-      loadComplaints(false);
-    }, 30000);
+  const resolvedComplaints = useMemo(() => 
+    complaints.filter((c) => RESOLVED_STATUSES.includes(c.status)), 
+  [complaints]);
 
-    return () => window.clearInterval(intervalId);
-  }, []);
+  const visibleComplaints = activeTab === 'active' ? activeComplaints : resolvedComplaints;
 
-  const loadComplaints = async (showLoader = false) => {
+  // Memoized fetch function
+  const loadComplaints = useCallback(async (showLoader = false) => {
     const token = localStorage.getItem('token');
-
     if (!token) {
       setLoading(false);
       return;
     }
 
     try {
-      if (showLoader) {
-        setLoading(true);
-      }
-
+      if (showLoader) setLoading(true);
       const response = await fetch(`${API_BASE_URL}/complaints/my`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Unable to load complaints.');
-      }
-
+      if (!response.ok) throw new Error(data.message || 'Unable to load complaints.');
       setComplaints(data);
     } catch (error) {
-      onNotify?.({
-        title: 'Unable to load complaints',
-        message: error.message || 'Please refresh and try again.',
-        tone: 'danger'
-      });
+      onNotify?.({ title: 'Unable to load complaints', message: error.message, tone: 'danger' });
     } finally {
-      if (showLoader) {
-        setLoading(false);
-      }
+      if (showLoader) setLoading(false);
     }
-  };
+  }, [onNotify]);
+
+  // Effect handles lifecycle
+  useEffect(() => {
+    loadComplaints(true);
+    const intervalId = window.setInterval(() => loadComplaints(false), 30000);
+    return () => window.clearInterval(intervalId);
+  }, [loadComplaints]); // Now safely dependent on loadComplaints
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -110,48 +80,35 @@ export default function ResidentComplaints({ currentUser, onNotify, theme, onTog
   const handleSubmit = async (event) => {
     event.preventDefault();
     const token = localStorage.getItem('token');
+    
+    // Trim values to prevent empty whitespace submissions
+    const cleanData = {
+      ...formData,
+      title: formData.title.trim(),
+      description: formData.description.trim()
+    };
 
     if (!token) {
-      onNotify?.({
-        title: 'Session expired',
-        message: 'Please sign in again to submit a complaint.',
-        tone: 'danger'
-      });
+      onNotify?.({ title: 'Session expired', message: 'Please sign in again.', tone: 'danger' });
       return;
     }
 
     try {
       setSubmitting(true);
-
       const response = await fetch(`${API_BASE_URL}/complaints`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(cleanData)
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Unable to submit complaint.');
-      }
+      if (!response.ok) throw new Error(data.message || 'Unable to submit.');
 
       setComplaints((current) => [data, ...current]);
       setFormData(INITIAL_FORM);
       setActiveTab('active');
-      onNotify?.({
-        title: 'Complaint submitted',
-        message: 'Your issue has been recorded and shared with the management team.',
-        tone: 'success'
-      });
+      onNotify?.({ title: 'Complaint submitted', message: 'Issue recorded.', tone: 'success' });
     } catch (error) {
-      onNotify?.({
-        title: 'Submission failed',
-        message: error.message || 'Please review the form and try again.',
-        tone: 'danger'
-      });
+      onNotify?.({ title: 'Submission failed', message: error.message, tone: 'danger' });
     } finally {
       setSubmitting(false);
     }
@@ -159,39 +116,20 @@ export default function ResidentComplaints({ currentUser, onNotify, theme, onTog
 
   const handleDelete = async (complaintId) => {
     const token = localStorage.getItem('token');
-
-    if (!token) {
-      return;
-    }
+    if (!token) return;
 
     try {
       setDeletingId(complaintId);
-
       const response = await fetch(`${API_BASE_URL}/complaints/${complaintId}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Unable to delete complaint.');
-      }
-
-      setComplaints((current) => current.filter((complaint) => complaint._id !== complaintId));
-      onNotify?.({
-        title: 'Complaint deleted',
-        message: 'The open complaint has been removed.',
-        tone: 'success'
-      });
+      if (!response.ok) throw new Error('Unable to delete.');
+      
+      setComplaints((current) => current.filter((c) => c._id !== complaintId));
+      onNotify?.({ title: 'Complaint deleted', message: 'Item removed.', tone: 'success' });
     } catch (error) {
-      onNotify?.({
-        title: 'Delete failed',
-        message: error.message || 'Only open complaints can be removed.',
-        tone: 'danger'
-      });
+      onNotify?.({ title: 'Delete failed', message: error.message, tone: 'danger' });
     } finally {
       setDeletingId('');
     }

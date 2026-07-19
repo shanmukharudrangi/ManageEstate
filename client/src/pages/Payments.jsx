@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react'; // Added useCallback
 import { useNavigate } from 'react-router-dom';
 import BrandLogo from '../components/BrandLogo';
 import Icon from '../components/Icon';
@@ -52,16 +52,8 @@ export default function Payments({ currentUser, onLogout, onNotify, theme, onTog
   const [addForm, setAddForm] = useState({ residentId: '', residentName: '', flatNumber: '', amount: '', status: 'Pending', method: 'Cash', note: '' });
   const [residents, setResidents] = useState([]);
 
-  useEffect(() => {
-    if (isAdmin) {
-      loadAdminData(selectedMonth);
-      loadResidents();
-    } else {
-      loadMyPayments();
-    }
-  }, [selectedMonth]);
-
-  async function loadResidents() {
+  // Wrapped in useCallback to stabilize dependencies
+  const loadResidents = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/users/residents`, { headers: authHeaders() });
       const data = await res.json();
@@ -70,9 +62,9 @@ export default function Payments({ currentUser, onLogout, onNotify, theme, onTog
     } catch (err) {
       onNotify({ title: 'Could not load residents', message: err.message, tone: 'danger' });
     }
-  }
+  }, [onNotify]);
 
-  async function loadAdminData(month) {
+  const loadAdminData = useCallback(async (month) => {
     try {
       setLoading(true);
       const [payRes, sumRes] = await Promise.all([
@@ -89,9 +81,9 @@ export default function Payments({ currentUser, onLogout, onNotify, theme, onTog
     } finally {
       setLoading(false);
     }
-  }
+  }, [onNotify]);
 
-  async function loadMyPayments() {
+  const loadMyPayments = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`${API_BASE}/payments/my`, { headers: authHeaders() });
@@ -103,7 +95,16 @@ export default function Payments({ currentUser, onLogout, onNotify, theme, onTog
     } finally {
       setLoading(false);
     }
-  }
+  }, [onNotify]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadAdminData(selectedMonth);
+      loadResidents();
+    } else {
+      loadMyPayments();
+    }
+  }, [selectedMonth, isAdmin, loadAdminData, loadResidents, loadMyPayments]);
 
   async function handleUpdate(payment) {
     setSaving(true);
@@ -150,10 +151,6 @@ export default function Payments({ currentUser, onLogout, onNotify, theme, onTog
     e.preventDefault();
     if (!addForm.residentId) {
       onNotify({ title: 'Select a resident', message: 'Please choose a resident from the dropdown.', tone: 'danger' });
-      return;
-    }
-    if (!addForm.amount || Number(addForm.amount) <= 0) {
-      onNotify({ title: 'Enter an amount', message: 'Amount must be greater than zero.', tone: 'danger' });
       return;
     }
     setSaving(true);

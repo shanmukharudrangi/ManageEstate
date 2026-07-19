@@ -172,7 +172,7 @@ export default function Auth({ onAuthSuccess, onNotify, theme, onToggleTheme }) 
 
       <div className="auth-layout">
         <section className="auth-photo-panel">
-          <img src={communityImg} alt="ManageEstate residential community" className="auth-photo-bg" />
+          <img src="/assets/login_page_1780062410462.png" alt="ManageEstate residential community" className="auth-photo-bg" />
           <div className="auth-photo-overlay">
             <div className="auth-photo-top">
               <div className="eyebrow-pill auth-photo-pill">

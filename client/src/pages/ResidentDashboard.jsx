@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CartesianGrid,
@@ -50,17 +50,41 @@ export default function ResidentDashboard({
   const [createdBy, setCreatedBy] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadDashboardData();
+  // Memoized calculations
+  const chartData = useMemo(() => 
+    breakdown ? breakdown.map((item) => ({
+      name: item.category,
+      value: item.amount,
+      percentage: item.percentage,
+      color: getCategoryMeta(item.category).color
+    })) : [], 
+  [breakdown]);
+
+  const highestCategory = useMemo(() => 
+    breakdown && breakdown.length > 0 
+      ? breakdown.reduce((largest, current) => (current.amount > largest.amount ? current : largest), breakdown[0])
+      : null, 
+  [breakdown]);
+
+  const loadBreakdown = useCallback(async (selectedMonth) => {
+    try {
+      setBreakdownLoading(true);
+      const response = await getExpenseBreakdown(selectedMonth);
+      setBreakdown(response.data.breakdown);
+      setTotalAmount(response.data.totalAmount);
+      setCreatedBy(response.data.createdBy);
+      setBreakdownError('');
+    } catch (error) {
+      setBreakdown(null);
+      setTotalAmount(0);
+      setCreatedBy(null);
+      setBreakdownError(error.response?.data?.message || 'No expense data is available.');
+    } finally {
+      setBreakdownLoading(false);
+    }
   }, []);
 
-  useEffect(() => {
-    if (!historyLoading && month) {
-      loadBreakdown(month);
-    }
-  }, [month, historyLoading]);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       setHistoryLoading(true);
       const [historyResponse, trendsResponse] = await Promise.all([getAllExpenses(), getTrends()]);
@@ -80,67 +104,41 @@ export default function ResidentDashboard({
     } finally {
       setHistoryLoading(false);
     }
-  };
+  }, [month, onNotify]);
 
-  const loadBreakdown = async (selectedMonth) => {
-    try {
-      setBreakdownLoading(true);
-      const response = await getExpenseBreakdown(selectedMonth);
-      setBreakdown(response.data.breakdown);
-      setTotalAmount(response.data.totalAmount);
-      setCreatedBy(response.data.createdBy);
-      setBreakdownError('');
-    } catch (error) {
-      setBreakdown(null);
-      setTotalAmount(0);
-      setCreatedBy(null);
-      setBreakdownError(
-        error.response?.data?.message || 'No expense data is available for this month.'
-      );
-    } finally {
-      setBreakdownLoading(false);
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
+
+  useEffect(() => {
+    if (!historyLoading && month) {
+      loadBreakdown(month);
     }
-  };
+  }, [month, historyLoading, loadBreakdown]);
 
-  const sendQuestion = async (nextQuestion) => {
+  const sendQuestion = useCallback(async (nextQuestion) => {
     const trimmedQuestion = nextQuestion.trim();
-
-    if (!trimmedQuestion) {
-      return;
-    }
+    if (!trimmedQuestion) return;
 
     setChatLoading(true);
-    setAiMessages((currentMessages) => [
-      ...currentMessages,
-      { role: 'user', content: trimmedQuestion }
-    ]);
+    setAiMessages((prev) => [...prev, { role: 'user', content: trimmedQuestion }]);
     setQuestion('');
 
     try {
       const response = await askAI({ question: trimmedQuestion, month });
-      setAiMessages((currentMessages) => [
-        ...currentMessages,
-        { role: 'assistant', content: response.data.answer }
-      ]);
+      setAiMessages((prev) => [...prev, { role: 'assistant', content: response.data.answer }]);
     } catch (error) {
       const message = error.response?.data?.message || 'Unable to get an AI response.';
-      setAiMessages((currentMessages) => [
-        ...currentMessages,
-        { role: 'assistant', content: `Error: ${message}` }
-      ]);
-      onNotify({
-        title: 'AI response unavailable',
-        message,
-        tone: 'danger'
-      });
+      setAiMessages((prev) => [...prev, { role: 'assistant', content: `Error: ${message}` }]);
+      onNotify({ title: 'AI response unavailable', message, tone: 'danger' });
     } finally {
       setChatLoading(false);
     }
-  };
+  }, [month, onNotify]);
 
-  const handleAskAI = async (event) => {
+  const handleAskAI = (event) => {
     event.preventDefault();
-    await sendQuestion(question);
+    sendQuestion(question);
   };
 
   const handleLogout = () => {
