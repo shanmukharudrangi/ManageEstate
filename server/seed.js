@@ -36,5 +36,4 @@ async function seed() {
     await mongoose.disconnect();
   }
 }
-
-seed();
+module.exports = seed;

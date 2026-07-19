@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const seed = require('./seed');
 require('dotenv').config();
 
 const app = express();
@@ -40,6 +41,9 @@ async function startServer() {
   try {
     await mongoose.connect(MONGODB_URI);
     console.log('MongoDB connected');
+    // 2. Run the seed function automatically
+    // We don't need to pass arguments if you design it carefully
+    await seed(); 
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
     });
