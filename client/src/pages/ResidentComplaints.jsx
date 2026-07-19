@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'; // Added hooks
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BrandLogo from '../components/BrandLogo';
 import Icon from '../components/Icon';
@@ -31,7 +31,7 @@ export default function ResidentComplaints({ currentUser, onNotify, theme, onTog
   const [deletingId, setDeletingId] = useState('');
   const navigate = useNavigate();
 
-  // Memoized filter functions
+  // Memoized filter functions (These handle the logic efficiently)
   const activeComplaints = useMemo(() => 
     complaints.filter((c) => ACTIVE_STATUSES.includes(c.status)), 
   [complaints]);
@@ -40,7 +40,9 @@ export default function ResidentComplaints({ currentUser, onNotify, theme, onTog
     complaints.filter((c) => RESOLVED_STATUSES.includes(c.status)), 
   [complaints]);
 
-  const visibleComplaints = activeTab === 'active' ? activeComplaints : resolvedComplaints;
+  const visibleComplaints = useMemo(() => 
+    activeTab === 'active' ? activeComplaints : resolvedComplaints,
+  [activeTab, activeComplaints, resolvedComplaints]);
 
   // Memoized fetch function
   const loadComplaints = useCallback(async (showLoader = false) => {
@@ -70,7 +72,7 @@ export default function ResidentComplaints({ currentUser, onNotify, theme, onTog
     loadComplaints(true);
     const intervalId = window.setInterval(() => loadComplaints(false), 30000);
     return () => window.clearInterval(intervalId);
-  }, [loadComplaints]); // Now safely dependent on loadComplaints
+  }, [loadComplaints]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -81,7 +83,6 @@ export default function ResidentComplaints({ currentUser, onNotify, theme, onTog
     event.preventDefault();
     const token = localStorage.getItem('token');
     
-    // Trim values to prevent empty whitespace submissions
     const cleanData = {
       ...formData,
       title: formData.title.trim(),
@@ -140,14 +141,6 @@ export default function ResidentComplaints({ currentUser, onNotify, theme, onTog
     localStorage.removeItem('user');
     window.location.assign('/auth');
   };
-
-  const activeComplaints = complaints.filter((complaint) =>
-    ACTIVE_STATUSES.includes(complaint.status)
-  );
-  const resolvedComplaints = complaints.filter((complaint) =>
-    RESOLVED_STATUSES.includes(complaint.status)
-  );
-  const visibleComplaints = activeTab === 'active' ? activeComplaints : resolvedComplaints;
 
   return (
     <div className="dashboard-shell">
