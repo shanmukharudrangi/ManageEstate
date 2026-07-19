@@ -146,62 +146,30 @@ export default function ResidentDashboard({
     navigate('/');
   };
 
-  const chartData = breakdown
-    ? breakdown.map((item) => ({
-        name: item.category,
-        value: item.amount,
-        percentage: item.percentage,
-        color: getCategoryMeta(item.category).color
-      }))
-    : [];
-
-  const highestCategory = breakdown
-    ? breakdown.reduce((largest, current) => (current.amount > largest.amount ? current : largest), breakdown[0])
-    : null;
-
   return (
     <div className="dashboard-shell">
+      {/* ... rest of your JSX remains exactly the same ... */}
       <div className="page-aurora" />
       <header className="dashboard-topbar">
         <BrandLogo compact />
         <div className="dashboard-actions">
-          <button
-            type="button"
-            className="button-secondary"
-            onClick={() => navigate('/marketplace')}
-          >
+          <button type="button" className="button-secondary" onClick={() => navigate('/marketplace')}>
             <Icon name="store" size={18} />
             <span>Marketplace</span>
           </button>
-          <button
-            type="button"
-            className="button-secondary"
-            onClick={() => navigate('/voting')}
-          >
+          <button type="button" className="button-secondary" onClick={() => navigate('/voting')}>
             <Icon name="spark" size={18} />
             <span>Votes</span>
           </button>
-          <button
-            type="button"
-            className="button-secondary"
-            onClick={() => navigate('/announcements')}
-          >
+          <button type="button" className="button-secondary" onClick={() => navigate('/announcements')}>
             <Icon name="bell" size={18} />
             <span>Notices</span>
           </button>
-          <button
-            type="button"
-            className="button-secondary"
-            onClick={() => navigate('/payments')}
-          >
+          <button type="button" className="button-secondary" onClick={() => navigate('/payments')}>
             <Icon name="wallet" size={18} />
             <span>Payments</span>
           </button>
-          <button
-            type="button"
-            className="button-secondary"
-            onClick={() => navigate('/complaints')}
-          >
+          <button type="button" className="button-secondary" onClick={() => navigate('/complaints')}>
             <Icon name="alert" size={18} />
             <span>Complaints</span>
           </button>
@@ -336,7 +304,6 @@ export default function ResidentDashboard({
                 <div className="breakdown-list">
                   {breakdown.map((item, index) => {
                     const meta = getCategoryMeta(item.category);
-
                     return (
                       <div key={`${item.category}-${index}`} className="breakdown-item">
                         <div className="breakdown-main">
