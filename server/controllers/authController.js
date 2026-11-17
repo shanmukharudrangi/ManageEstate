@@ -8,7 +8,7 @@ const normalizeEmail = (email = '') => email.trim().toLowerCase();
 function createToken(user) {
   return jwt.sign(
     { userId: user._id, role: user.role, status: user.status, name: user.name, apartment: user.apartment || '' },
-    process.env.JWT_SECRET || 'your-secret-key',
+    process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
 }

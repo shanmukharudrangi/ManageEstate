@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import BrandLogo from '../components/BrandLogo';
 import Icon from '../components/Icon';
 
-const API_BASE = '/api/superadmin';
+const API_BASE = `${import.meta.env.VITE_API_URL || '/api'}/superadmin`;
 
 function authHeaders() {
   const token = localStorage.getItem('token');

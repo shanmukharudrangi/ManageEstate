@@ -73,6 +73,10 @@ router.get('/', authMiddleware, async (req, res) => {
 // POST /api/polls/:id/vote — resident votes
 router.post('/:id/vote', authMiddleware, async (req, res) => {
   try {
+    if (req.user.role !== 'resident') {
+      return res.status(403).json({ message: 'Only residents can vote.' });
+    }
+
     const userId = getUserId(req);
     const { optionIndex } = req.body;
     const poll = await Poll.findById(req.params.id);

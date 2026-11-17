@@ -11,6 +11,18 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
+// Return a useful response instead of allowing Mongoose to buffer requests
+// while the database is disconnected.
+app.use('/api', (req, res, next) => {
+  if (req.path === '/health') return next();
+
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ message: 'Database connection is unavailable. Please try again shortly.' });
+  }
+
+  next();
+});
+
 // API Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/expenses', require('./routes/expenseRoutes'));
@@ -34,11 +46,14 @@ app.get(/(.*)/, (req, res) => {
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || process.env.API_PORT || 8000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/society-maintenance';
 
 async function startServer() {
   try {
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET must be configured.');
+    }
     // Add options for automatic reconnection
     const options = {
       serverSelectionTimeoutMS: 5000,
@@ -50,9 +65,8 @@ async function startServer() {
       console.log('MongoDB disconnected! Attempting to reconnect...');
       mongoose.connect(MONGODB_URI, options).catch(err => console.log('Reconnection failed'));
     });
-    // 2. Run the seed function automatically
-    // We don't need to pass arguments if you design it carefully
-    await seed(false); 
+    // Creates the initial superadmin only when none exists; never resets it.
+    await seed(false);
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
     });
@@ -61,13 +75,4 @@ async function startServer() {
     process.exit(1);
   }
 }
-// Add this middleware in server.js before your routes
-app.use((req, res, next) => {
-  if (mongoose.connection.readyState !== 1) {
-    return res.status(503).json({ 
-      message: 'Database connection lost. Please refresh the page.' 
-    });
-  }
-  next();
-});
 startServer();

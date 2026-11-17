@@ -3,8 +3,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('./models/User');
 
-// Add 'shouldDisconnect' argument with a default of true
-async function seed(shouldDisconnect = true) { 
+async function seed(shouldDisconnect = true) {
   try {
     // Only connect if not already connected
     if (mongoose.connection.readyState === 0) {
@@ -12,16 +11,18 @@ async function seed(shouldDisconnect = true) {
         await mongoose.connect(mongoUri);
     }
 
-    const email = process.env.SUPERADMIN_EMAIL || 'superadmin@manageestate.com';
-    const rawPassword = process.env.SUPERADMIN_PASSWORD || 'SuperAdmin@2026';
-
     const existing = await User.findOne({ role: 'superadmin' });
 
     if (existing) {
-      existing.password = rawPassword;
-      await existing.save();
-      console.log('Super admin password reset successfully:', existing.email);
-      return; // Exit without disconnecting
+      console.log('Super admin already exists:', existing.email);
+      return;
+    }
+
+    const email = process.env.SUPERADMIN_EMAIL || 'superadmin@manageestate.com';
+    const rawPassword = process.env.SUPERADMIN_PASSWORD;
+
+    if (!rawPassword) {
+      throw new Error('SUPERADMIN_PASSWORD must be set before the first server start.');
     }
 
     await User.create({
@@ -37,7 +38,6 @@ async function seed(shouldDisconnect = true) {
   } catch (err) {
     console.error('Seed error:', err.message);
   } finally {
-    // ONLY disconnect if the argument is true
     if (shouldDisconnect) {
         await mongoose.disconnect();
     }
