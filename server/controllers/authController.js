@@ -32,7 +32,7 @@ exports.signup = async (req, res) => {
       return res.status(403).json({ message: 'Super admin cannot be created via signup.' });
     }
 
-    if (!['admin', 'resident'].includes(role)) {
+    if (!['admin', 'resident', 'security'].includes(role)) {
       return res.status(400).json({ message: 'Invalid role selected.' });
     }
 
@@ -58,7 +58,7 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: 'User already exists.' });
     }
 
-    const isAdmin = role === 'admin';
+    const requiresApproval = role === 'admin' || role === 'security';
 
     const user = new User({
       name,
@@ -66,16 +66,16 @@ exports.signup = async (req, res) => {
       password,
       role,
       apartment,
-      status: isAdmin ? 'pending' : 'active',
-      adminRequestNote: isAdmin ? adminRequestNote : '',
+      status: requiresApproval ? 'pending' : 'active',
+      adminRequestNote: requiresApproval ? adminRequestNote : '',
       joinCodeUsed: role === 'resident' ? joinCode : ''
     });
 
     await user.save();
 
-    if (isAdmin) {
+    if (requiresApproval) {
       return res.status(201).json({
-        message: 'Admin request submitted. Awaiting super admin approval.',
+        message: `${role === 'security' ? 'Security' : 'Admin'} request submitted. Awaiting super admin approval.`,
         pendingApproval: true
       });
     }

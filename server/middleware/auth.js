@@ -26,4 +26,12 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-module.exports = { authMiddleware, adminOnly };
+const securityOnly = (req, res, next) => {
+  if (req.user.role !== 'security') {
+    return res.status(403).json({ message: 'Security access required.' });
+  }
+
+  next();
+};
+
+module.exports = { authMiddleware, adminOnly, securityOnly };

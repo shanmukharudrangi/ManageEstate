@@ -103,7 +103,7 @@ export default function Auth({ onAuthSuccess, onNotify, theme, onToggleTheme }) 
             ...formData,
             name: formData.name.trim(),
             email: formData.email.trim(),
-            adminRequestNote: formData.role === 'admin' ? adminRequestNote.trim() : '',
+            adminRequestNote: ['admin', 'security'].includes(formData.role) ? adminRequestNote.trim() : '',
             joinCode: formData.role === 'resident' ? joinCode.trim() : ''
           })
         : await login({
@@ -132,6 +132,8 @@ export default function Auth({ onAuthSuccess, onNotify, theme, onToggleTheme }) 
         navigate('/superadmin');
       } else if (role === 'admin') {
         navigate('/admin');
+      } else if (role === 'security') {
+        navigate('/security');
       } else {
         navigate('/dashboard');
       }
@@ -300,18 +302,20 @@ export default function Auth({ onAuthSuccess, onNotify, theme, onToggleTheme }) 
                 <div className="field-block">
                   <span className="field-label">Choose role</span>
                   <div className="role-toggle">
-                    {['resident', 'admin'].map((role) => (
+                    {['resident', 'admin', 'security'].map((role) => (
                       <button
                         key={role}
                         type="button"
                         className={formData.role === role ? 'role-card role-card-active' : 'role-card'}
                         onClick={() => handleRoleChange(role)}
                       >
-                        <strong>{role === 'resident' ? 'Resident' : 'Admin'}</strong>
+                        <strong>{role === 'resident' ? 'Resident' : role === 'admin' ? 'Admin' : 'Security'}</strong>
                         <span>
                           {role === 'resident'
                             ? 'View breakdowns, trends, and AI help'
-                            : 'Add monthly expenses and manage records'}
+                            : role === 'admin'
+                              ? 'Manage expenses, payments, notices, and complaints'
+                              : 'Verify visitors and manage gate entry and exit'}
                         </span>
                       </button>
                     ))}
@@ -332,13 +336,13 @@ export default function Auth({ onAuthSuccess, onNotify, theme, onToggleTheme }) 
                   </div>
                 )}
 
-                {formData.role === 'admin' && (
+                {['admin', 'security'].includes(formData.role) && (
                   <>
                     <div className="field-block">
-                      <span className="field-label">Why do you need admin access?</span>
+                      <span className="field-label">Why do you need {formData.role === 'security' ? 'security' : 'admin'} access?</span>
                       <textarea
                         className="field-input admin-note-textarea"
-                        placeholder="e.g. I am the treasurer of Sunshine Apartments"
+                        placeholder={formData.role === 'security' ? 'e.g. I work at the gate for Sunshine Apartments' : 'e.g. I am the treasurer of Sunshine Apartments'}
                         maxLength={200}
                         value={adminRequestNote}
                         onChange={(e) => setAdminRequestNote(e.target.value)}
@@ -351,7 +355,7 @@ export default function Auth({ onAuthSuccess, onNotify, theme, onToggleTheme }) 
                     <div className="admin-approval-info">
                       <span>ℹ️</span>
                       <p>
-                        Admin access requires Super Admin approval. You can only login after
+                        {formData.role === 'security' ? 'Security' : 'Admin'} access requires Super Admin approval. You can only login after
                         your request is approved.
                       </p>
                     </div>
@@ -451,8 +455,8 @@ export default function Auth({ onAuthSuccess, onNotify, theme, onToggleTheme }) 
               {loading
                 ? 'Please wait...'
                 : isSignup
-                  ? formData.role === 'admin'
-                    ? 'Submit Admin Request'
+                  ? ['admin', 'security'].includes(formData.role)
+                    ? `Submit ${formData.role === 'security' ? 'Security' : 'Admin'} Request`
                     : 'Create account'
                   : 'Login →'}
               {!loading && <Icon name="arrow-right" size={18} />}

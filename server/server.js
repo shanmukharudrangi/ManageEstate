@@ -33,6 +33,7 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/polls', require('./routes/polls'));
 app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/payments', require('./routes/payments'));
+app.use('/api/visitors', require('./routes/visitors'));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running' });

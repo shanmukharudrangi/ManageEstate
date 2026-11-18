@@ -15,6 +15,7 @@ import Marketplace from './pages/Marketplace';
 import Voting from './pages/Voting';
 import Announcements from './pages/Announcements';
 import Payments from './pages/Payments';
+import Visitors from './pages/Visitors';
 
 function getStoredUser() {
   try {
@@ -106,6 +107,8 @@ function App() {
                 <Navigate to="/superadmin" replace />
               ) : user.role === 'admin' ? (
                 <Navigate to="/admin" replace />
+              ) : user.role === 'security' ? (
+                <Navigate to="/security" replace />
               ) : (
                 <Navigate to="/dashboard" replace />
               )
@@ -123,6 +126,8 @@ function App() {
                 <Navigate to="/superadmin" replace />
               ) : user.role === 'admin' ? (
                 <Navigate to="/admin" replace />
+              ) : user.role === 'security' ? (
+                <Navigate to="/security" replace />
               ) : (
                 <Navigate to="/dashboard" replace />
               )
@@ -213,7 +218,7 @@ function App() {
         <Route
           path="/voting"
           element={
-            user ? (
+            user?.role === 'resident' || user?.role === 'admin' || user?.role === 'superadmin' ? (
               <Voting currentUser={user} onLogout={handleLogout} onNotify={showToast} theme={theme} onToggleTheme={toggleTheme} />
             ) : (
               <Navigate to="/auth" replace />
@@ -222,9 +227,20 @@ function App() {
         />
 
         <Route
+          path="/security"
+          element={
+            user?.role === 'security' ? (
+              <Visitors currentUser={user} onLogout={handleLogout} onNotify={showToast} theme={theme} onToggleTheme={toggleTheme} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
           path="/announcements"
           element={
-            user ? (
+            user?.role === 'resident' || user?.role === 'admin' || user?.role === 'superadmin' ? (
               <Announcements currentUser={user} onLogout={handleLogout} onNotify={showToast} theme={theme} onToggleTheme={toggleTheme} />
             ) : (
               <Navigate to="/auth" replace />
@@ -235,8 +251,25 @@ function App() {
         <Route
           path="/payments"
           element={
-            user ? (
+            user?.role === 'resident' || user?.role === 'admin' || user?.role === 'superadmin' ? (
               <Payments currentUser={user} onLogout={handleLogout} onNotify={showToast} theme={theme} onToggleTheme={toggleTheme} />
+            ) : (
+              <Navigate to="/auth" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/visitors"
+          element={
+            user?.role === 'resident' || user?.role === 'security' ? (
+              <Visitors
+                currentUser={user}
+                onLogout={handleLogout}
+                onNotify={showToast}
+                theme={theme}
+                onToggleTheme={toggleTheme}
+              />
             ) : (
               <Navigate to="/auth" replace />
             )

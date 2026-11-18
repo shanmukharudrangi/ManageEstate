@@ -169,6 +169,10 @@ export default function ResidentDashboard({
             <Icon name="wallet" size={18} />
             <span>Payments</span>
           </button>
+          <button type="button" className="button-secondary" onClick={() => navigate('/visitors')}>
+            <Icon name="team" size={18} />
+            <span>Visitors</span>
+          </button>
           <button type="button" className="button-secondary" onClick={() => navigate('/complaints')}>
             <Icon name="alert" size={18} />
             <span>Complaints</span>

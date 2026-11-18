@@ -30,8 +30,8 @@ function requireSuperAdmin(req, res, next) {
 router.get('/pending', requireSuperAdmin, async (req, res) => {
   try {
     const pendingUsers = await User.find(
-      { status: 'pending' },
-      '_id name email apartment adminRequestNote createdAt'
+      { status: 'pending', role: { $in: ['admin', 'security'] } },
+      '_id name email apartment role adminRequestNote createdAt'
     ).sort({ createdAt: 1 });
 
     res.json(pendingUsers);
@@ -48,8 +48,11 @@ router.put('/approve/:userId', requireSuperAdmin, async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
+    if (!['admin', 'security'].includes(user.role) || user.status !== 'pending') {
+      return res.status(400).json({ message: 'Only pending admin or security requests can be approved.' });
+    }
+
     user.status = 'active';
-    user.role = 'admin';
     await user.save();
 
     res.json({
@@ -77,6 +80,10 @@ router.put('/reject/:userId', requireSuperAdmin, async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
+    if (!['admin', 'security'].includes(user.role) || user.status !== 'pending') {
+      return res.status(400).json({ message: 'Only pending admin or security requests can be rejected.' });
+    }
+
     user.status = 'rejected';
     user.rejectionReason = reason;
     await user.save();
@@ -97,14 +104,14 @@ router.put('/reject/:userId', requireSuperAdmin, async (req, res) => {
   }
 });
 
-router.get('/all-admins', requireSuperAdmin, async (req, res) => {
+router.get('/all-staff', requireSuperAdmin, async (req, res) => {
   try {
-    const admins = await User.find(
-      { role: 'admin', status: 'active' },
-      '_id name email apartment createdAt'
+    const staff = await User.find(
+      { role: { $in: ['admin', 'security'] }, status: 'active' },
+      '_id name email apartment role createdAt'
     );
 
-    res.json(admins);
+    res.json(staff);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

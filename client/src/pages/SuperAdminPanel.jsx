@@ -21,7 +21,7 @@ export default function SuperAdminPanel({ currentUser, onLogout, onNotify, theme
   const navigate = useNavigate();
 
   const [pendingRequests, setPendingRequests] = useState([]);
-  const [allAdmins, setAllAdmins] = useState([]);
+  const [staffMembers, setStaffMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectingUserId, setRejectingUserId] = useState(null);
@@ -38,10 +38,10 @@ export default function SuperAdminPanel({ currentUser, onLogout, onNotify, theme
     try {
       const [pending, admins] = await Promise.all([
         apiFetch('/pending'),
-        apiFetch('/all-admins')
+        apiFetch('/all-staff')
       ]);
       setPendingRequests(pending);
-      setAllAdmins(admins);
+      setStaffMembers(admins);
     } catch (error) {
       onNotify({ title: 'Load failed', message: error.message, tone: 'danger' });
     } finally {
@@ -53,11 +53,11 @@ export default function SuperAdminPanel({ currentUser, onLogout, onNotify, theme
     loadData();
   }, []);
 
-  const handleApprove = async (userId, name) => {
+  const handleApprove = async (userId, name, role) => {
     setActionLoading(true);
     try {
       await apiFetch(`/approve/${userId}`, { method: 'PUT' });
-      onNotify({ title: 'Approved', message: `${name} is now an active admin.`, tone: 'success' });
+      onNotify({ title: 'Approved', message: `${name} is now active ${role}.`, tone: 'success' });
       await loadData();
     } catch (error) {
       onNotify({ title: 'Approval failed', message: error.message, tone: 'danger' });
@@ -121,9 +121,9 @@ export default function SuperAdminPanel({ currentUser, onLogout, onNotify, theme
               <Icon name="spark" size={16} />
               <span>Super Admin</span>
             </div>
-            <h1 className="dashboard-title">Admin Request Management</h1>
+            <h1 className="dashboard-title">Staff Access Management</h1>
             <p className="dashboard-subtitle">
-              Review and approve admin access requests for ManageEstate.
+              Review and approve admin and security access requests for ManageEstate.
             </p>
           </div>
           <div className="hero-meta">
@@ -138,12 +138,12 @@ export default function SuperAdminPanel({ currentUser, onLogout, onNotify, theme
           <article className="metric-card">
             <span className="metric-label">Pending requests</span>
             <strong>{loading ? '—' : pendingRequests.length}</strong>
-            <p>Admin accounts awaiting your review.</p>
+            <p>Admin and security accounts awaiting your review.</p>
           </article>
           <article className="metric-card">
-            <span className="metric-label">Active admins</span>
-            <strong>{loading ? '—' : allAdmins.length}</strong>
-            <p>Approved admin accounts currently active.</p>
+            <span className="metric-label">Active staff</span>
+            <strong>{loading ? '—' : staffMembers.length}</strong>
+            <p>Approved admin and security accounts.</p>
           </article>
         </section>
 
@@ -152,7 +152,7 @@ export default function SuperAdminPanel({ currentUser, onLogout, onNotify, theme
             <div className="section-head">
               <div>
                 <p className="section-kicker">Approval queue</p>
-                <h2 className="section-heading">Pending Requests</h2>
+                <h2 className="section-heading">Pending Staff Requests</h2>
               </div>
             </div>
 
@@ -176,6 +176,7 @@ export default function SuperAdminPanel({ currentUser, onLogout, onNotify, theme
                         <span className="superadmin-badge superadmin-badge-pending">Pending</span>
                       </div>
                       <p className="superadmin-request-email">{req.email}</p>
+                      <p className="superadmin-request-meta">Requested role: {req.role}</p>
                       {req.apartment && (
                         <p className="superadmin-request-meta">
                           <Icon name="calendar" size={14} /> Apartment: {req.apartment}
@@ -197,7 +198,7 @@ export default function SuperAdminPanel({ currentUser, onLogout, onNotify, theme
                         type="button"
                         className="button-primary"
                         disabled={actionLoading}
-                        onClick={() => handleApprove(req._id, req.name)}
+                        onClick={() => handleApprove(req._id, req.name, req.role)}
                       >
                         <Icon name="spark" size={16} />
                         <span>Approve</span>
@@ -222,7 +223,7 @@ export default function SuperAdminPanel({ currentUser, onLogout, onNotify, theme
             <div className="section-head">
               <div>
                 <p className="section-kicker">Approved accounts</p>
-                <h2 className="section-heading">Active Admins</h2>
+                <h2 className="section-heading">Active Staff</h2>
               </div>
             </div>
 
@@ -231,18 +232,18 @@ export default function SuperAdminPanel({ currentUser, onLogout, onNotify, theme
                 <div className="spinner-ring" />
                 <p>Loading admins…</p>
               </div>
-            ) : allAdmins.length === 0 ? (
+            ) : staffMembers.length === 0 ? (
               <div className="superadmin-empty">
-                <p>No active admins yet.</p>
+                <p>No active staff yet.</p>
               </div>
             ) : (
               <div className="superadmin-admin-list">
-                {allAdmins.map((admin) => (
+                {staffMembers.map((admin) => (
                   <div key={admin._id} className="superadmin-admin-row glass-panel">
                     <div className="superadmin-request-info">
                       <div className="superadmin-request-name">
                         <strong>{admin.name}</strong>
-                        <span className="superadmin-badge superadmin-badge-active">Active</span>
+                        <span className="superadmin-badge superadmin-badge-active">{admin.role}</span>
                       </div>
                       <p className="superadmin-request-email">{admin.email}</p>
                       {admin.apartment && (
